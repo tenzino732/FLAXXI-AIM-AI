@@ -1,7 +1,7 @@
 {
-  "name": "aimai-key-manager",
+  "name": "aim-ai-server",
   "version": "1.0.0",
-  "description": "Key manager for AimAi",
+  "description": "AimAi License Server",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
