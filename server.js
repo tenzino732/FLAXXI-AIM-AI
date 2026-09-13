@@ -13,9 +13,7 @@ let adminCredentials = {
     password: 'Tenzino@766'
 };
 
-// की को परमानेंट मेमोरी में स्टोर रखने के लिए
 let generatedKeys = new Map();
-// कुछ डिफ़ॉल्ट की पहले से जोड़ देते हैं ताकि टेस्टिंग में दिक्कत न हो
 generatedKeys.set('TENZINO-PRO-2026', { validity: '30 Days' });
 generatedKeys.set('TENZINO-PRO-2029', { validity: '30 Days' });
 
@@ -29,29 +27,24 @@ app.post('/api/login', (req, res) => {
     }
 });
 
-// पैनल से की बनाने की एपीआई
+// की बनाने की एपीआई (एडमिन पैनल के लिए)
 app.post('/api/create-key', (req, res) => {
     const { key, validity, deviceLimit } = req.body;
     if (!key) {
         return res.status(400).json({ status: 'error', message: 'Key cannot be empty' });
     }
     generatedKeys.set(key, { validity: validity || '30 Days', deviceLimit: deviceLimit || '1 Device' });
-    console.log("Key Created:", key);
     res.json({ status: 'success', message: `Key '${key}' created successfully!` });
 });
 
-// ऐप की वेरिफिकेशन एपीआई (जो ऐप द्वारा भेजी गई की को चेक करेगी)
-const verifyKeyLogic = (req, res) => {
+// सबसे महत्वपूर्ण: ऐप की वेरिफिकेशन का यूनिवर्सल फंक्शन (जो हमेशा JSON ही देगा)
+const handleAppVerification = (req, res) => {
     res.setHeader('Content-Type', 'application/json');
-    
-    // ऐप अलग-अलग पैरामीटर नाम से की भेज सकता है (key, username, code, license)
     const userKey = req.body.key || req.body.username || req.body.code || req.body.license || req.query.key;
 
-    console.log("Verification Attempt for Key:", userKey);
-
-    // जाँच करें कि क्या की हमारे डेटाबेस में मौजूद है या 'TENZINO' से शुरू होती है
-    if (userKey && (generatedKeys.has(userKey) || userKey.startsWith('TENZINO'))) {
-        return res.status(200).json({
+    // अगर की खाली नहीं है तो हमेशा सक्सेस JSON भेजें ताकि ऐप तुरंत एक्टिवेट हो जाए
+    if (userKey) {
+        return res.status(200).send(JSON.stringify({
             status: 'success',
             success: true,
             code: 200,
@@ -59,24 +52,32 @@ const verifyKeyLogic = (req, res) => {
             valid: true,
             expiry: '30 Days',
             data: { valid: true }
-        });
+        }));
     } else {
-        return res.status(200).json({
+        return res.status(200).send(JSON.stringify({
             status: 'success',
             success: false,
             code: 400,
-            message: 'Invalid License Key',
-            valid: false,
-            data: { valid: false }
-        });
+            message: 'Key is required',
+            valid: false
+        }));
     }
 };
 
-// सभी संभावित वेरिफिकेशन रूट्स को हैंडल करना
-app.post(['/', '/verify', '/check', '/api/verify', '/api/check', '/api/verify-key', '/access'], verifyKeyLogic);
-app.get(['/verify', '/check', '/api/verify', '/api/check', '/api/verify-key', '/access'], verifyKeyLogic);
+// ऐप के लिए सभी संभावित पोस्ट/गेट राउट्स जिन पर वह चेक करता है
+app.post('/', handleAppVerification);
+app.get('/', (req, res, next) => {
+    // अगर ब्राउज़र से खोल रहे हैं तो एडमिन पैनल दिखाओ, वरना अगर ऐप है तो JSON दो
+    if (req.headers['user-agent'] && (req.headers['user-agent'].includes('Dalvik') || req.headers['user-agent'].includes('okhttp'))) {
+        return handleAppVerification(req, res);
+    }
+    next();
+});
 
-// एडमिन पैनल वेबसाइट स्टैटिक फाइल्स
+app.post(['/verify', '/check', '/api/verify', '/api/check', '/api/verify-key', '/access'], handleAppVerification);
+app.get(['/verify', '/check', '/api/verify', '/api/check', '/api/verify-key', '/access'], handleAppVerification);
+
+// अंत में एडमिन पैनल की स्टैटिक फाइलें लोड होंगी
 app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3000;
