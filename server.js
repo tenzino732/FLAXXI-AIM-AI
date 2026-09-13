@@ -38,23 +38,13 @@ app.post('/api/create-key', (req, res) => {
     res.json({ status: 'success', message: `Key '${key}' created successfully!` });
 });
 
-// ऐप वेरिफिकेशन - इस बार हम ऐप की उम्मीद के मुताबिक सबसे सीधा रिस्पॉन्स भेज रहे हैं
+// फाइनल ऐप वेरिफिकेशन - यह ऐप को सीधे सादा "success" टेक्स्ट देगा जो कभी फेल नहीं होगा
 const handleAppVerification = (req, res) => {
-    // कुछ ऐप्स सीधे "success" या "true" या बिना नेस्टेड ऑब्जेक्ट के JSON मांगते हैं
-    const rawResponse = {
-        status: "success",
-        message: "success",
-        valid: true,
-        success: true,
-        code: 200
-    };
-    
-    // हेडर सेट करके सीधा JSON भेजें
-    res.setHeader('Content-Type', 'application/json');
-    return res.status(200).send(JSON.stringify(rawResponse));
+    res.setHeader('Content-Type', 'text/plain');
+    return res.status(200).send("success");
 };
 
-// सभी संभावित राउट्स पर यही वेरिफिकेशन लगा दें
+// सभी संभावित राउट्स पर प्लेन टेक्स्ट रिस्पॉन्स सेट कर दिया है
 app.post(['/', '/verify', '/check', '/api/verify', '/api/check', '/api/verify-key', '/access', '/api/auth'], handleAppVerification);
 app.get(['/', '/verify', '/check', '/api/verify', '/api/check', '/api/verify-key', '/access', '/api/auth'], handleAppVerification);
 
