@@ -38,17 +38,17 @@ app.post('/api/create-key', (req, res) => {
     res.json({ status: 'success', message: `Key '${key}' created successfully!` });
 });
 
-// फाइनल ऐप वेरिफिकेशन - यह ऐप को सीधे सादा "success" टेक्स्ट देगा जो कभी फेल नहीं होगा
+// ऐप वेरिफिकेशन फंक्शन (प्लेन टेक्स्ट "success")
 const handleAppVerification = (req, res) => {
     res.setHeader('Content-Type', 'text/plain');
     return res.status(200).send("success");
 };
 
-// सभी संभावित राउट्स पर प्लेन टेक्स्ट रिस्पॉन्स सेट कर दिया है
+// ऐप के लिए वेरिफिकेशन रूट्स
 app.post(['/', '/verify', '/check', '/api/verify', '/api/check', '/api/verify-key', '/access', '/api/auth'], handleAppVerification);
-app.get(['/', '/verify', '/check', '/api/verify', '/api/check', '/api/verify-key', '/access', '/api/auth'], handleAppVerification);
+app.get(['/verify', '/check', '/api/verify', '/api/check', '/api/verify-key', '/access', '/api/auth'], handleAppVerification);
 
-// एडमिन पैनल स्टैटिक फाइलें
+// सबसे महत्वपूर्ण: ब्राउज़र के लिए एडमिन पैनल स्टैटिक फाइलें (ताकि लिंक खोलने पर वेबसाइट दिखे)
 app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3000;
