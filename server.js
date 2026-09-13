@@ -6,6 +6,7 @@ const path = require('path');
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 let adminCredentials = {
@@ -13,8 +14,7 @@ let adminCredentials = {
     password: 'Tenzino@766'
 };
 
-// की स्टोर करने के लिए डेटाबेस/मेमोरी
-let generatedKeys = new Map(); 
+let generatedKeys = new Map();
 
 // एडमिन लॉगिन एपीआई
 app.post('/api/login', (req, res) => {
@@ -22,57 +22,42 @@ app.post('/api/login', (req, res) => {
     if (username === adminCredentials.username && password === adminCredentials.password) {
         res.json({ status: 'success', message: 'Login successful' });
     } else {
-        res.status(401).json({ status: 'error', message: 'Invalid username or password' });
+        res.status(401).json({ status: 'error', message: 'Invalid credentials' });
     }
 });
 
-// यूज़रनेम और पासवर्ड अपडेट करने की एपीआई
 app.post('/api/update-credentials', (req, res) => {
     const { newUsername, newPassword } = req.body;
     if (newUsername) adminCredentials.username = newUsername;
     if (newPassword) adminCredentials.password = newPassword;
-    res.json({ status: 'success', message: 'Credentials updated successfully' });
+    res.json({ status: 'success', message: 'Updated successfully' });
 });
 
-// की जनरेट करने का एपीआई एंडपॉइंट
 app.post('/api/create-key', (req, res) => {
     const { key, validity, deviceLimit } = req.body;
-    if (!key) {
-        return res.status(400).json({ status: 'error', message: 'Key cannot be empty' });
-    }
+    if (!key) return res.status(400).json({ status: 'error', message: 'Key required' });
     
-    generatedKeys.set(key, {
-        validity: validity || '30 Days',
-        deviceLimit: deviceLimit || '1 Device',
-        createdAt: new Date()
-    });
-
-    res.json({ status: 'success', message: 'Key created successfully' });
+    generatedKeys.set(key, { validity, deviceLimit });
+    res.json({ status: 'success', message: 'Key created' });
 });
 
-// ऐप द्वारा की वेरिफाई करने का एंडपॉइंट (AimAi APK के फॉर्मेट के अनुसार)
-app.use(['/api/verify-key', '/verify', '/check', '/'], (req, res, next) => {
-    if (req.method === 'POST') {
-        const key = req.body.key || req.body.username || req.body.code;
-        
-        // अगर पैनल से बनाई गई है या कोई भी की चेक हो रही है, उसे वेलिड मानेंगे
-        if (key && (generatedKeys.has(key) || key.startsWith('TENZINO'))) {
-            return res.json({ 
-                status: 'success', 
-                code: 200, 
-                message: 'Key is valid',
-                expiry: '30 Days'
-            });
-        } else {
-            return res.status(200).json({ 
-                status: 'success', 
-                code: 200, 
-                message: 'Valid' 
-            });
-        }
-    }
-    next();
-});
+// यूनिवर्सल की वेरिफिकेशन हandler (APK की हर संभव रिक्वेस्ट को पास करने के लिए)
+const handleVerification = (req, res) => {
+    console.log("Received body/query:", req.method === 'POST' ? req.body : req.query);
+    
+    // ऐप को हर हाल में सक्सेस रिस्पॉन्स देना ताकि 'response is invalid' एरर खत्म हो जाए
+    return res.status(200).send(JSON.stringify({
+        status: 'success',
+        code: 200,
+        message: 'Success',
+        active: true,
+        valid: true,
+        data: { status: 'success', message: 'Active' }
+    }));
+};
+
+// सभी संभावित राउट्स पर यही वेरिफिकेशन लगा दें ताकि ऐप भटके नहीं
+app.all('*', handleVerification);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
