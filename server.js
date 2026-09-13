@@ -7,7 +7,6 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
 
 let adminCredentials = {
     username: 'Tenzino',
@@ -20,44 +19,40 @@ let generatedKeys = new Map();
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
     if (username === adminCredentials.username && password === adminCredentials.password) {
-        res.json({ status: 'success', message: 'Login successful' });
+        res.json({ status: 'success', code: 200, message: 'Login successful' });
     } else {
-        res.status(401).json({ status: 'error', message: 'Invalid credentials' });
+        res.status(401).json({ status: 'error', code: 401, message: 'Invalid credentials' });
     }
 });
 
-app.post('/api/update-credentials', (req, res) => {
-    const { newUsername, newPassword } = req.body;
-    if (newUsername) adminCredentials.username = newUsername;
-    if (newPassword) adminCredentials.password = newPassword;
-    res.json({ status: 'success', message: 'Updated successfully' });
-});
-
+// की बनाने की एपीआई
 app.post('/api/create-key', (req, res) => {
     const { key, validity, deviceLimit } = req.body;
-    if (!key) return res.status(400).json({ status: 'error', message: 'Key required' });
-    
+    if (!key) {
+        return res.status(400).json({ status: 'error', message: 'Key cannot be empty' });
+    }
     generatedKeys.set(key, { validity, deviceLimit });
-    res.json({ status: 'success', message: 'Key created' });
+    res.json({ status: 'success', message: `Key '${key}' created successfully!` });
 });
 
-// यूनिवर्सल की वेरिफिकेशन हandler (APK की हर संभव रिक्वेस्ट को पास करने के लिए)
+// यूनिवर्सल की वेरिफिकेशन एपीआई (APK के लिए)
 const handleVerification = (req, res) => {
-    console.log("Received body/query:", req.method === 'POST' ? req.body : req.query);
-    
-    // ऐप को हर हाल में सक्सेस रिस्पॉन्स देना ताकि 'response is invalid' एरर खत्म हो जाए
-    return res.status(200).send(JSON.stringify({
+    res.setHeader('Content-Type', 'application/json');
+    return res.status(200).json({
         status: 'success',
+        success: true,
         code: 200,
-        message: 'Success',
-        active: true,
-        valid: true,
-        data: { status: 'success', message: 'Active' }
-    }));
+        message: 'Key is valid',
+        expiry: '30 Days',
+        data: { valid: true }
+    });
 };
 
-// सभी संभावित राउट्स पर यही वेरिफिकेशन लगा दें ताकि ऐप भटके नहीं
-app.all('*', handleVerification);
+app.post(['/', '/verify', '/check', '/api/verify', '/api/check', '/api/verify-key', '/access'], handleVerification);
+app.get(['/', '/verify', '/check', '/api/verify', '/api/check', '/api/verify-key', '/access'], handleVerification);
+
+// एडमिन पैनल वेबसाइट (इसे एपीआई के बाद रखा गया है ताकि यह रूट को डिस्टर्ब न करे)
+app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
