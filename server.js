@@ -38,31 +38,23 @@ app.post('/api/create-key', (req, res) => {
     res.json({ status: 'success', message: `Key '${key}' created successfully!` });
 });
 
-// ऐप के लिए हर संभावित फॉर्मेट वाला फुल-प्रूफ वेरिफिकेशन रिस्पॉन्स
+// ऐप वेरिफिकेशन - इस बार हम ऐप की उम्मीद के मुताबिक सबसे सीधा रिस्पॉन्स भेज रहे हैं
 const handleAppVerification = (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
-    
-    // ऐप जिस भी फॉर्मेट में रिस्पॉन्स मांग रहा है, हम सब एक साथ दे रहे हैं ताकि ऐप को जो चाहिए वो मिल जाए
-    const successResponse = {
+    // कुछ ऐप्स सीधे "success" या "true" या बिना नेस्टेड ऑब्जेक्ट के JSON मांगते हैं
+    const rawResponse = {
         status: "success",
-        success: true,
-        code: 200,
-        message: "Key is valid",
+        message: "success",
         valid: true,
-        activated: true,
-        expiry: "30 Days",
-        data: {
-            valid: true,
-            status: "success",
-            message: "Success",
-            expiry: "30 Days"
-        }
+        success: true,
+        code: 200
     };
-
-    return res.status(200).json(successResponse);
+    
+    // हेडर सेट करके सीधा JSON भेजें
+    res.setHeader('Content-Type', 'application/json');
+    return res.status(200).send(JSON.stringify(rawResponse));
 };
 
-// सभी संभावित राउट्स जो ऐप हिट कर सकता है
+// सभी संभावित राउट्स पर यही वेरिफिकेशन लगा दें
 app.post(['/', '/verify', '/check', '/api/verify', '/api/check', '/api/verify-key', '/access', '/api/auth'], handleAppVerification);
 app.get(['/', '/verify', '/check', '/api/verify', '/api/check', '/api/verify-key', '/access', '/api/auth'], handleAppVerification);
 
