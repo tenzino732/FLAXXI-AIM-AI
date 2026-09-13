@@ -16,6 +16,7 @@ let adminCredentials = {
 let generatedKeys = new Map();
 generatedKeys.set('TENZINO-PRO-2026', { validity: '30 Days' });
 generatedKeys.set('TENZINO-PRO-2029', { validity: '30 Days' });
+generatedKeys.set('TENZINO-K75M6M', { validity: '30 Days' });
 
 // एडमिन लॉगिन एपीआई
 app.post('/api/login', (req, res) => {
@@ -27,7 +28,7 @@ app.post('/api/login', (req, res) => {
     }
 });
 
-// की बनाने की एपीआई (एडमिन पैनल के लिए)
+// की बनाने की एपीआई
 app.post('/api/create-key', (req, res) => {
     const { key, validity, deviceLimit } = req.body;
     if (!key) {
@@ -37,47 +38,35 @@ app.post('/api/create-key', (req, res) => {
     res.json({ status: 'success', message: `Key '${key}' created successfully!` });
 });
 
-// सबसे महत्वपूर्ण: ऐप की वेरिफिकेशन का यूनिवर्सल फंक्शन (जो हमेशा JSON ही देगा)
+// ऐप के लिए हर संभावित फॉर्मेट वाला फुल-प्रूफ वेरिफिकेशन रिस्पॉन्स
 const handleAppVerification = (req, res) => {
     res.setHeader('Content-Type', 'application/json');
-    const userKey = req.body.key || req.body.username || req.body.code || req.body.license || req.query.key;
-
-    // अगर की खाली नहीं है तो हमेशा सक्सेस JSON भेजें ताकि ऐप तुरंत एक्टिवेट हो जाए
-    if (userKey) {
-        return res.status(200).send(JSON.stringify({
-            status: 'success',
-            success: true,
-            code: 200,
-            message: 'Key is valid',
+    
+    // ऐप जिस भी फॉर्मेट में रिस्पॉन्स मांग रहा है, हम सब एक साथ दे रहे हैं ताकि ऐप को जो चाहिए वो मिल जाए
+    const successResponse = {
+        status: "success",
+        success: true,
+        code: 200,
+        message: "Key is valid",
+        valid: true,
+        activated: true,
+        expiry: "30 Days",
+        data: {
             valid: true,
-            expiry: '30 Days',
-            data: { valid: true }
-        }));
-    } else {
-        return res.status(200).send(JSON.stringify({
-            status: 'success',
-            success: false,
-            code: 400,
-            message: 'Key is required',
-            valid: false
-        }));
-    }
+            status: "success",
+            message: "Success",
+            expiry: "30 Days"
+        }
+    };
+
+    return res.status(200).json(successResponse);
 };
 
-// ऐप के लिए सभी संभावित पोस्ट/गेट राउट्स जिन पर वह चेक करता है
-app.post('/', handleAppVerification);
-app.get('/', (req, res, next) => {
-    // अगर ब्राउज़र से खोल रहे हैं तो एडमिन पैनल दिखाओ, वरना अगर ऐप है तो JSON दो
-    if (req.headers['user-agent'] && (req.headers['user-agent'].includes('Dalvik') || req.headers['user-agent'].includes('okhttp'))) {
-        return handleAppVerification(req, res);
-    }
-    next();
-});
+// सभी संभावित राउट्स जो ऐप हिट कर सकता है
+app.post(['/', '/verify', '/check', '/api/verify', '/api/check', '/api/verify-key', '/access', '/api/auth'], handleAppVerification);
+app.get(['/', '/verify', '/check', '/api/verify', '/api/check', '/api/verify-key', '/access', '/api/auth'], handleAppVerification);
 
-app.post(['/verify', '/check', '/api/verify', '/api/check', '/api/verify-key', '/access'], handleAppVerification);
-app.get(['/verify', '/check', '/api/verify', '/api/check', '/api/verify-key', '/access'], handleAppVerification);
-
-// अंत में एडमिन पैनल की स्टैटिक फाइलें लोड होंगी
+// एडमिन पैनल स्टैटिक फाइलें
 app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3000;
