@@ -5,234 +5,209 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AimAi Key Manager</title>
     <style>
-        body { 
-            background-color: #07070a; 
-            color: #fff; 
-            font-family: Arial, sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-            overflow: hidden;
-            position: relative;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
-        /* Deadly / Dark Crimson Animated Background Glow */
-        body::before {
-            content: '';
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(220, 20, 60, 0.25) 0%, rgba(15, 5, 10, 0) 70%);
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            animation: pulseGlow 4s infinite alternate ease-in-out;
-            z-index: -1;
+        body {
+            background-color: #0b0b0f;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
         }
-
-        @keyframes pulseGlow {
-            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.4; }
-            100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.9; }
+        .container {
+            background: #14141d;
+            border: 1px solid rgba(255, 0, 85, 0.3);
+            box-shadow: 0 0 25px rgba(255, 0, 85, 0.2);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 420px;
+            padding: 25px;
+            text-align: center;
         }
-
-        .card { 
-            background: rgba(18, 18, 26, 0.85); 
-            backdrop-filter: blur(10px);
-            padding: 25px; 
-            border-radius: 14px; 
-            width: 320px; 
-            box-shadow: 0 0 25px rgba(220, 20, 60, 0.3), inset 0 0 10px rgba(220, 20, 60, 0.1); 
-            border: 1px solid rgba(220, 20, 60, 0.4);
-            position: relative; 
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        h2 { 
-            text-align: center; 
-            color: #ff1e4d; 
-            margin-bottom: 20px; 
-            text-shadow: 0 0 10px rgba(255, 30, 77, 0.5);
-            font-size: 22px;
+        h2 {
+            color: #ff0055;
+            margin-bottom: 25px;
+            font-size: 24px;
             letter-spacing: 0.5px;
         }
-
-        label { 
-            font-size: 12px; 
-            color: #a0a0ab; 
-            display: block; 
-            margin-top: 10px; 
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
         }
-
-        input, select { 
-            width: 100%; 
-            padding: 10px; 
-            margin-top: 5px; 
-            background: #121218; 
-            border: 1px solid #2d2d3d; 
-            color: #fff; 
-            border-radius: 6px; 
-            box-sizing: border-box; 
-            transition: border-color 0.3s;
+        label {
+            display: block;
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 8px;
         }
-
-        input:focus, select:focus {
-            border-color: #ff1e4d;
+        .input-row {
+            display: flex;
+            gap: 8px;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            background: #1e1e2d;
+            border: 1px solid #2a2a3d;
+            color: #fff;
+            border-radius: 8px;
             outline: none;
-            box-shadow: 0 0 8px rgba(255, 30, 77, 0.4);
+            font-size: 14px;
         }
-
-        button { 
-            width: 100%; 
-            background: linear-gradient(135deg, #cc0033, #880022); 
-            color: #fff; 
-            border: none; 
-            padding: 12px; 
-            margin-top: 20px; 
-            border-radius: 6px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: 0.3s;
-            box-shadow: 0 4px 12px rgba(204, 0, 51, 0.4);
+        input:focus, select:focus {
+            border-color: #ff0055;
         }
-
-        button:hover { 
-            background: linear-gradient(135deg, #ff1e4d, #cc0033);
-            box-shadow: 0 6px 18px rgba(255, 30, 77, 0.6);
+        .gen-btn {
+            background: #2a2a3d;
+            border: 1px solid #ff0055;
+            color: #ff0055;
+            padding: 0 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: 0.2s;
         }
-
-        .settings-btn { 
-            position: absolute; 
-            top: 20px; 
-            right: 20px; 
-            background: none; 
-            border: none; 
-            color: #a0a0ab; 
-            cursor: pointer; 
-            font-size: 18px; 
-            width: auto; 
-            margin: 0; 
-            padding: 0; 
-            transition: transform 0.3s, color 0.3s;
+        .gen-btn:hover {
+            background: #ff0055;
+            color: #fff;
         }
-
-        .settings-btn:hover { 
-            color: #ff1e4d; 
-            transform: rotate(90deg);
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #ff0055, #cc0044);
+            border: none;
+            color: white;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 0, 85, 0.4);
+            transition: 0.2s;
+            margin-top: 10px;
         }
-
-        .hidden { display: none; }
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+        #response-msg {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .keyList {
+            margin-top: 25px;
+            text-align: left;
+            max-height: 150px;
+            overflow-y: auto;
+            border-top: 1px solid #2a2a3d;
+            padding-top: 10px;
+        }
+        .keyList h4 {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        .key-item {
+            background: #1a1a26;
+            padding: 6px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            color: #00ffcc;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Admin Login Screen -->
-    <div id="loginScreen" class="card">
-        <h2>Admin Login</h2>
-        <label>Username</label>
-        <input type="text" id="loginUser" placeholder="Enter username">
-        
-        <label>Password</label>
-        <input type="password" id="loginPass" placeholder="Enter password">
-
-        <button onclick="loginAdmin()">Login</button>
-    </div>
-
-    <!-- Main Key Manager Dashboard -->
-    <div id="dashboardScreen" class="card hidden">
-        <button class="settings-btn" onclick="openSettings()">⚙️</button>
+    <div class="container">
         <h2>AimAi Key Manager</h2>
         
-        <label>Generate Key / Username</label>
-        <input type="text" id="keyInput" placeholder="Enter key">
+        <div class="form-group">
+            <label>Generate Key / Username</label>
+            <div class="input-row">
+                <input type="text" id="keyInput" placeholder="Enter or Generate Key" value="TENZINO-PRO-2029">
+                <button type="button" class="gen-btn" onclick="generateRandomKey()">Auto Gen</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Select Validity (Duration)</label>
+            <select id="validityInput">
+                <option value="30 Days">30 Days</option>
+                <option value="60 Days">60 Days</option>
+                <option value="90 Days">90 Days</option>
+                <option value="Lifetime">Lifetime</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Device Limit</label>
+            <select id="deviceInput">
+                <option value="1 Device">1 Device</option>
+                <option value="2 Devices">2 Devices</option>
+                <option value="Unlimited">Unlimited</option>
+            </select>
+        </div>
+
+        <button type="button" class="submit-btn" onclick="createKey()">Create Key</button>
         
-        <label>Select Validity (Duration)</label>
-        <select id="validityInput">
-            <option value="1 Day">1 Day</option>
-            <option value="7 Days">7 Days</option>
-            <option value="30 Days">30 Days</option>
-        </select>
+        <div id="response-msg"></div>
 
-        <label>Device Limit</label>
-        <select id="deviceInput">
-            <option value="1 Device">1 Device</option>
-            <option value="2 Devices">2 Devices</option>
-        </select>
-
-        <button onclick="createKey()">Create Key</button>
-    </div>
-
-    <!-- Settings Screen (To edit Username & Password) -->
-    <div id="settingsScreen" class="card hidden">
-        <button class="settings-btn" onclick="closeSettings()" style="font-size: 14px;">✕ Back</button>
-        <h2>Admin Settings</h2>
-        
-        <label>New Username</label>
-        <input type="text" id="newUsername">
-
-        <label>New Password</label>
-        <input type="password" id="newPassword">
-
-        <button onclick="updateCredentials()">Save Settings</button>
+        <div class="keyList">
+            <h4>Generated Keys History</h4>
+            <div id="keysContainer">
+                <div class="key-item"><span>TENZINO-PRO-2029</span><span>30 Days</span></div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Set the default credentials explicitly here
-        let adminUser = "Tenzino";
-        let adminPass = "Tenzino@766";
-
-        function loginAdmin() {
-            const u = document.getElementById('loginUser').value;
-            const p = document.getElementById('loginPass').value;
-
-            if (u === adminUser && p === adminPass) {
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('dashboardScreen').classList.remove('hidden');
-            } else {
-                alert("Invalid Username or Password!");
+        // ऑटोमैटिक रैंडम की जेनरेट करने का फंक्शन
+        function generateRandomKey() {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            let randomPart = "";
+            for (let i = 0; i < 6; i++) {
+                randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
             }
+            document.getElementById('keyInput').value = "TENZINO-" + randomPart;
         }
 
-        function openSettings() {
-            document.getElementById('dashboardScreen').classList.add('hidden');
-            document.getElementById('settingsScreen').classList.remove('hidden');
-            // Populate the input fields with the current values when the settings screen is opened
-            document.getElementById('newUsername').value = adminUser;
-            document.getElementById('newPassword').value = adminPass;
-        }
-
-        function closeSettings() {
-            document.getElementById('settingsScreen').classList.add('hidden');
-            document.getElementById('dashboardScreen').classList.remove('hidden');
-        }
-
-        function updateCredentials() {
-            const newU = document.getElementById('newUsername').value;
-            const newP = document.getElementById('newPassword').value;
-
-            if (newU && newP) {
-                adminUser = newU;
-                adminPass = newP;
-                alert("Credentials updated successfully!");
-                closeSettings();
-            } else {
-                alert("Fields cannot be empty!");
-            }
-        }
-
-        function createKey() {
+        async function createKey() {
             const key = document.getElementById('keyInput').value;
-            if (!key) {
-                alert("Please enter a key!");
-                return;
+            const validity = document.getElementById('validityInput').value;
+            const deviceLimit = document.getElementById('deviceInput').value;
+            const msgDiv = document.getElementById('response-msg');
+
+            try {
+                const response = await fetch('/api/create-key', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key, validity, deviceLimit })
+                });
+                const data = await response.json();
+                
+                if(data.status === 'success') {
+                    msgDiv.style.color = "#00ffcc";
+                    msgDiv.innerText = data.message;
+                    
+                    // नीचे लिस्ट में भी की जोड़ दें
+                    const container = document.getElementById('keysContainer');
+                    container.innerHTML += `<div class="key-item"><span>${key}</span><span>${validity}</span></div>`;
+                } else {
+                    msgDiv.style.color = "#ff0055";
+                    msgDiv.innerText = data.message || "Failed to create key";
+                }
+            } catch (err) {
+                msgDiv.style.color = "#ff0055";
+                msgDiv.innerText = "Network error occurred!";
             }
-            alert("Key '" + key + "' created successfully!");
         }
     </script>
 </body>
